@@ -17,14 +17,15 @@
         $karten;
         $istgedreht;
         $Spielstart = false;
-        // Spiel starten bzw. Neu starten
-        if (isset($_POST["Spielstart"])) {
-            $Spielstart = true;
-        }
+  
     ?>
     </form>
     <?php
-        if($Spielstart){
+        // prüfen ob Spiel schon gestartet wurde oder bisher noch kein Spielbrett erstellt wurde (beim ersten Aufruf der Seite)
+        if(isset($_POST["Spielstart"]) || empty($_SESSION["karten"]) || empty($_SESSION["istgedreht"]) ){
+            /* Der ersten Karte den Wert -1 zuweisen damit beim Neustarten des Spiels die Karte welche 
+            umgedreht ist wieder zurück gedreht wird also nicht mehr offen ist*/
+            $_SESSION["erstKarte"] = -1;
             // Array mit 8 Kartenpaaren erstellen und mischen
             $karten = array(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8);    
             shuffle($karten);
@@ -52,14 +53,14 @@
         if(isset($_POST["karte"])){
             $karte = $_POST["karte"]; // übernimmt den Index der Karte, welche geklickt wurde
             // prüfen ob es die erste Karte ist, die angeklickt wurde
-            if($_SESSION["ersteKarte"] == -1){
-                $_SESSION["ersteKarte"] = $karte; // Karte als erste Karte in Session speichern
+            if($_SESSION["erstKarte"] == -1){
+                $_SESSION["erstKarte"] = $karte; // Karte als erste Karte in Session speichern
             } else {
                 $reset = true;
                 // Wenn beider Karten übereinstimmen bleiben sie Dauerhaft umgedreht 
                 if(check($karte,$karten)){
                     $istgedreht[$karte] = true;
-                    $istgedreht[$_SESSION["ersteKarte"]] = true;
+                    $istgedreht[$_SESSION["erstKarte"]] = true;
                     $match = true;
                     $_SESSION["istgedreht"] = $istgedreht;
                 }
@@ -79,7 +80,8 @@
         <?php
             }
             echo "<td>";
-            if($istgedreht[$i] == false && $i != $karte && $_SESSION["ersteKarte"] != $i){
+            //prüfen ob eine Karte gedreht ist oder nicht
+            if($istgedreht[$i] == false && $i != $karte && $_SESSION["erstKarte"] != $i){
                 if(!$reset){
                     ?>
                     <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
@@ -104,7 +106,7 @@
         // Ausgabe Meldung und OK Button zum zurückdrehen
         if($reset){
             ?><h1><?php echo  $match ? "Super gleich weiter" : "Merke dir die Karten ganz genau";?></h1><?php
-            $_SESSION["ersteKarte"] = -1;
+            $_SESSION["erstKarte"] = -1;
             ?>
             <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
                 <input type="submit" value="OK">
@@ -114,7 +116,7 @@
 
     // Funktion zum prüfen ob beide Karten übereinstimmen     
     function check($karte,$karten){
-        $erste = $karten[$_SESSION["ersteKarte"]];
+        $erste = $karten[$_SESSION["erstKarte"]];
         return $erste == $karten[$karte];
     }
 ?>
