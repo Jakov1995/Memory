@@ -25,8 +25,6 @@
     </form>
     <?php
         if($Spielstart){
-            // Der ersten Karte den Wert -1 zuweisen damit keine Fehler entstehen
-            $_SESSION["ersteKarte"] = -1;
             // Array mit 8 Kartenpaaren erstellen und mischen
             $karten = array(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8);    
             shuffle($karten);
@@ -54,14 +52,14 @@
         if(isset($_POST["karte"])){
             $karte = $_POST["karte"]; // übernimmt den Index der Karte, welche geklickt wurde
             // prüfen ob es die erste Karte ist, die angeklickt wurde
-            if($_SESSION["erstKarte"] == -1){
-                $_SESSION["erstKarte"] = $karte; // Karte als erste Karte in Session speichern
+            if($_SESSION["ersteKarte"] == -1){
+                $_SESSION["ersteKarte"] = $karte; // Karte als erste Karte in Session speichern
             } else {
                 $reset = true;
                 // Wenn beider Karten übereinstimmen bleiben sie Dauerhaft umgedreht 
                 if(check($karte,$karten)){
                     $istgedreht[$karte] = true;
-                    $istgedreht[$_SESSION["erstKarte"]] = true;
+                    $istgedreht[$_SESSION["ersteKarte"]] = true;
                     $match = true;
                     $_SESSION["istgedreht"] = $istgedreht;
                 }
@@ -81,7 +79,7 @@
         <?php
             }
             echo "<td>";
-            if($istgedreht[$i] == false && $i != $karte && $_SESSION["erstKarte"] != $i){
+            if($istgedreht[$i] == false && $i != $karte && $_SESSION["ersteKarte"] != $i){
                 if(!$reset){
                     ?>
                     <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
@@ -106,7 +104,7 @@
         // Ausgabe Meldung und OK Button zum zurückdrehen
         if($reset){
             ?><h1><?php echo  $match ? "Super gleich weiter" : "Merke dir die Karten ganz genau";?></h1><?php
-            $_SESSION["erstKarte"] = -1;
+            $_SESSION["ersteKarte"] = -1;
             ?>
             <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
                 <input type="submit" value="OK">
@@ -116,7 +114,7 @@
 
     // Funktion zum prüfen ob beide Karten übereinstimmen     
     function check($karte,$karten){
-        $erste = $karten[$_SESSION["erstKarte"]];
+        $erste = $karten[$_SESSION["ersteKarte"]];
         return $erste == $karten[$karte];
     }
 ?>
